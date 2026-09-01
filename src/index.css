@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-app: oklch(0.16 0.014 55);
+  --color-sidebar: oklch(0.135 0.013 55);
+  --color-surface: oklch(0.215 0.015 55);
+  --color-surface-hover: oklch(0.255 0.016 55);
+  --color-surface-2: oklch(0.19 0.014 55);
+  --color-border: oklch(0.27 0.014 55);
+  --color-ink-1: oklch(0.94 0.008 60);
+  --color-ink-2: oklch(0.68 0.018 60);
+  --color-ink-3: oklch(0.5 0.016 60);
+  --color-accent: oklch(0.74 0.15 45);
+  --color-accent-hover: oklch(0.69 0.16 45);
+  --color-accent-soft: oklch(0.3 0.055 48);
+  --color-accent-soft-border: oklch(0.42 0.09 46);
+  --color-presence: oklch(0.72 0.16 148);
+  --color-danger: oklch(0.64 0.19 25);
+  --color-on-accent: oklch(0.99 0.005 90);
+
+  --color-app-light: oklch(0.975 0.009 78);
+  --color-card-light: oklch(0.997 0.003 90);
+  --color-border-light: oklch(0.9 0.012 75);
+  --color-ink-1-light: oklch(0.24 0.02 50);
+  --color-ink-2-light: oklch(0.5 0.02 50);
+  --color-ink-3-light: oklch(0.62 0.016 50);
+  --color-accent-light: oklch(0.66 0.16 45);
+  --color-accent-soft-light: oklch(0.93 0.045 55);
+
+  --font-display: 'Sora', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-app);
+  color: var(--color-ink-1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-2);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-surface-hover);
+}
+
+@keyframes dc-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.typing-dot {
+  animation: dc-bounce 1.2s infinite ease-in-out;
+}

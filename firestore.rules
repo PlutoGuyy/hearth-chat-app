@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAllowlisted() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/allowlist/$(request.auth.token.email));
+    }
+
+    function isMember(roomId) {
+      return signedIn() &&
+        get(/databases/$(database)/documents/rooms/$(roomId)).data.memberIds.hasAny([request.auth.uid]);
+    }
+
+    // Invite list. Each user may only read the single doc that matches
+    // their own email, to check whether they've been invited. Any
+    // already-allowlisted member may invite a new email (create only —
+    // existing entries can't be edited or removed from the app, so an
+    // invite can't accidentally revoke someone; do that by hand in the
+    // console if it's ever needed).
+    match /allowlist/{email} {
+      allow read: if signedIn() && request.auth.token.email == email;
+      allow create: if isAllowlisted();
+      allow update, delete: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isAllowlisted();
+      allow create, update: if signedIn() && request.auth.uid == uid && isAllowlisted();
+      allow delete: if false;
+    }
+
+    match /rooms/{roomId} {
+      allow read: if signedIn() && resource.data.memberIds.hasAny([request.auth.uid]);
+      allow create: if isAllowlisted() &&
+        request.resource.data.memberIds.hasAny([request.auth.uid]);
+      allow update: if signedIn() && resource.data.memberIds.hasAny([request.auth.uid]);
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isMember(roomId);
+        allow create: if isMember(roomId) && request.resource.data.senderId == request.auth.uid;
+        // The sender may edit/delete their own message; any member may
+        // toggle reactions, as long as that's the only field they touch.
+        allow update: if isMember(roomId) && (
+          resource.data.senderId == request.auth.uid ||
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
+        );
+        allow delete: if isMember(roomId) && resource.data.senderId == request.auth.uid;
+      }
+
+      match /typing/{uid} {
+        allow read: if isMember(roomId);
+        allow write: if isMember(roomId) && request.auth.uid == uid;
+      }
+    }
+  }
+}
