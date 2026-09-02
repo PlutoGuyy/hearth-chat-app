@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Sidebar } from '../Sidebar/Sidebar'
 import { ConversationView } from '../Conversation/ConversationView'
-import { UpdateBanner } from '../shared/UpdateBanner'
 import { BackIcon, FlameIcon } from '../icons/Icons'
 import { useRooms } from '../../hooks/useRooms'
 import { findOrCreateDirectRoom, createGroupRoom } from '../../lib/rooms'
@@ -45,8 +44,7 @@ export function AppShell({ uid, profile, onSignOut }: AppShellProps) {
   }
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-hidden bg-app">
-      <UpdateBanner />
+    <div className="flex h-full w-full flex-col overflow-hidden bg-app">
       <div className="flex min-h-0 flex-1">
         <div className={`${showListOnMobile ? 'flex' : 'hidden'} w-full md:flex md:w-auto`}>
           <Sidebar
