@@ -106,5 +106,8 @@ export function useAuth() {
 function describeError(err: unknown): string {
   if (err instanceof NotInvitedError) return err.message
   if (err instanceof Error) return err.message
+  // Tauri command errors (our Rust `google_sign_in`) reject with a plain
+  // string, not an Error instance.
+  if (typeof err === 'string') return err
   return 'Something went wrong. Try again.'
 }

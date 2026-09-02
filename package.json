@@ -1,7 +1,7 @@
 {
   "name": "hearth-chat-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,6 +12,9 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.11.0",
     "date-fns": "^4.4.0",
     "firebase": "^12.18.0",
     "framer-motion": "^13.1.1",

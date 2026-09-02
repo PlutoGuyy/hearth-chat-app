@@ -13,6 +13,9 @@ dist-ssr
 dist-standalone
 *.local
 .env
+*.deb
+*.AppImage
+*.exe
 
 # Editor directories and files
 .vscode/*

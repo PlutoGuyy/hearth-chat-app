@@ -3,12 +3,14 @@ import {
   isSignInWithEmailLink,
   onAuthStateChanged,
   sendSignInLinkToEmail,
+  signInWithCredential,
   signInWithEmailLink,
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth'
 import { arrayUnion, doc, getDoc, serverTimestamp, setDoc, updateDoc } from 'firebase/firestore'
+import { invoke, isTauri } from '@tauri-apps/api/core'
 import { auth, db } from './firebase'
 import { MAIN_ROOM_ID } from '../types'
 
@@ -26,8 +28,22 @@ export function subscribeToAuth(cb: (user: User | null) => void) {
 }
 
 export async function signInWithGoogle() {
+  if (isTauri()) return signInWithGoogleDesktop()
+
   const provider = new GoogleAuthProvider()
   const result = await signInWithPopup(auth, provider)
+  await completeSignIn(result.user)
+  return result.user
+}
+
+// Desktop apps can't use Firebase's popup/redirect helpers — Google blocks
+// OAuth sign-in from embedded webviews outright. Instead the Rust side opens
+// the system browser, runs a loopback HTTP server to catch Google's redirect
+// (see src-tauri/src/lib.rs), and hands back real Google tokens here.
+async function signInWithGoogleDesktop() {
+  const { idToken, accessToken } = await invoke<{ idToken: string; accessToken: string }>('google_sign_in')
+  const credential = GoogleAuthProvider.credential(idToken, accessToken)
+  const result = await signInWithCredential(auth, credential)
   await completeSignIn(result.user)
   return result.user
 }

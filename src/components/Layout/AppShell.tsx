@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Sidebar } from '../Sidebar/Sidebar'
 import { ConversationView } from '../Conversation/ConversationView'
+import { UpdateBanner } from '../shared/UpdateBanner'
 import { BackIcon, FlameIcon } from '../icons/Icons'
 import { useRooms } from '../../hooks/useRooms'
 import { findOrCreateDirectRoom, createGroupRoom } from '../../lib/rooms'
@@ -44,45 +45,48 @@ export function AppShell({ uid, profile, onSignOut }: AppShellProps) {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-app">
-      <div className={`${showListOnMobile ? 'flex' : 'hidden'} w-full md:flex md:w-auto`}>
-        <Sidebar
-          rooms={rooms}
-          profiles={profiles}
-          currentUid={uid}
-          currentProfile={profile}
-          activeRoomId={activeRoomId}
-          unread={unread}
-          onSelectRoom={selectRoom}
-          onCreateDM={handleCreateDM}
-          onCreateGroup={handleCreateGroup}
-          onSignOut={onSignOut}
-        />
-      </div>
-
-      <div className={`${showListOnMobile ? 'hidden' : 'flex'} min-w-0 flex-1 md:flex`}>
-        {activeRoom ? (
-          <ConversationView
-            key={activeRoom.id}
-            room={activeRoom}
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-app">
+      <UpdateBanner />
+      <div className="flex min-h-0 flex-1">
+        <div className={`${showListOnMobile ? 'flex' : 'hidden'} w-full md:flex md:w-auto`}>
+          <Sidebar
+            rooms={rooms}
             profiles={profiles}
             currentUid={uid}
-            leading={
-              <button
-                type="button"
-                onClick={() => setShowListOnMobile(true)}
-                className="-ml-2 flex h-11 w-11 flex-shrink-0 items-center justify-center text-ink-1 md:hidden"
-              >
-                <BackIcon className="h-[21px] w-[21px]" />
-              </button>
-            }
+            currentProfile={profile}
+            activeRoomId={activeRoomId}
+            unread={unread}
+            onSelectRoom={selectRoom}
+            onCreateDM={handleCreateDM}
+            onCreateGroup={handleCreateGroup}
+            onSignOut={onSignOut}
           />
-        ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-ink-3">
-            <FlameIcon className="h-8 w-8 text-accent opacity-40" />
-            <div className="text-sm">Loading The Hearth…</div>
-          </div>
-        )}
+        </div>
+
+        <div className={`${showListOnMobile ? 'hidden' : 'flex'} min-w-0 flex-1 md:flex`}>
+          {activeRoom ? (
+            <ConversationView
+              key={activeRoom.id}
+              room={activeRoom}
+              profiles={profiles}
+              currentUid={uid}
+              leading={
+                <button
+                  type="button"
+                  onClick={() => setShowListOnMobile(true)}
+                  className="-ml-2 flex h-11 w-11 flex-shrink-0 items-center justify-center text-ink-1 md:hidden"
+                >
+                  <BackIcon className="h-[21px] w-[21px]" />
+                </button>
+              }
+            />
+          ) : (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 text-ink-3">
+              <FlameIcon className="h-8 w-8 text-accent opacity-40" />
+              <div className="text-sm">Loading The Hearth…</div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
