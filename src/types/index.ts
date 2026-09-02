@@ -50,6 +50,9 @@ export interface Message {
   deletedAt: Timestamp | null
   attachments: Attachment[]
   reactions: Record<string, string[]>
+  // A YouTube link in `text` embeds automatically unless this is set —
+  // toggled off from the composer's preview or while editing.
+  embedDisabled: boolean
 }
 
 export interface TypingState {

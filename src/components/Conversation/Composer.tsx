@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { CloseIcon, EmojiIcon, PaperclipIcon, SendIcon } from '../icons/Icons'
 import { GifPicker } from './GifPicker'
+import { YouTubeEmbed } from './YouTubeEmbed'
 import { notifyTyping, sendMessage, uploadAttachment } from '../../lib/rooms'
+import { extractYouTubeEmbed } from '../../lib/youtube'
 import type { GifResult } from '../../lib/giphy'
 import type { Attachment } from '../../types'
 
@@ -20,7 +22,11 @@ export function Composer({ roomId, uid, placeholder }: ComposerProps) {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
   const [gifOpen, setGifOpen] = useState(false)
+  const [embedDismissedFor, setEmbedDismissedFor] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const embed = useMemo(() => extractYouTubeEmbed(text), [text])
+  const embedDismissed = !!embed && embedDismissedFor === embed.videoId
 
   async function handleSelectGif(gif: GifResult) {
     await sendMessage(roomId, uid, '', [
@@ -48,13 +54,20 @@ export function Composer({ roomId, uid, placeholder }: ComposerProps) {
     setText('')
     const attachments = pending
     setPending([])
-    await sendMessage(roomId, uid, trimmed, attachments)
+    await sendMessage(roomId, uid, trimmed, attachments, embedDismissed)
+    setEmbedDismissedFor(null)
   }
 
   return (
     <div className="flex flex-shrink-0 flex-col gap-2 border-t border-border px-6 py-3.5">
       {uploadError && (
         <div className="pl-12 text-[12.5px] font-medium text-danger">{uploadError}</div>
+      )}
+
+      {embed && !embedDismissed && (
+        <div className="pl-12">
+          <YouTubeEmbed embed={embed} onRemove={() => setEmbedDismissedFor(embed.videoId)} className="max-w-[220px]" />
+        </div>
       )}
 
       {pending.length > 0 && (

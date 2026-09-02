@@ -98,7 +98,7 @@ export function MessageList({
                     const reacted = message.reactions?.[emoji]?.includes(currentUid)
                     toggleReaction(room.id, message.id, currentUid, emoji, !reacted)
                   }}
-                  onEdit={(text) => editMessage(room.id, message.id, text)}
+                  onEdit={(text, embedDisabled) => editMessage(room.id, message.id, text, embedDisabled)}
                   onDelete={() => deleteMessage(room.id, message.id)}
                 />
               </motion.div>

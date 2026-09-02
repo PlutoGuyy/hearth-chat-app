@@ -3,6 +3,8 @@ import { motion } from 'framer-motion'
 import { messageTime } from '../../lib/time'
 import { CheckDoubleIcon } from '../icons/Icons'
 import { Avatar } from '../shared/Avatar'
+import { YouTubeEmbed } from './YouTubeEmbed'
+import { extractYouTubeEmbed } from '../../lib/youtube'
 import type { Message, UserProfile } from '../../types'
 
 const QUICK_REACTIONS = ['👍', '❤️', '😂', '😮']
@@ -16,7 +18,7 @@ interface MessageBubbleProps {
   readLabel?: string | null
   currentUid: string
   onToggleReaction: (emoji: string) => void
-  onEdit: (text: string) => void
+  onEdit: (text: string, embedDisabled: boolean) => void
   onDelete: () => void
 }
 
@@ -36,9 +38,11 @@ export function MessageBubble({
   const [picker, setPicker] = useState(false)
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(message.text)
+  const [editEmbedDisabled, setEditEmbedDisabled] = useState(message.embedDisabled)
 
   const isDeleted = !!message.deletedAt
   const reactionEntries = Object.entries(message.reactions || {}).filter(([, uids]) => uids.length > 0)
+  const embed = !isDeleted ? extractYouTubeEmbed(editing ? draft : message.text) : null
 
   const bubbleRadius = isOwn
     ? isLastInGroup
@@ -48,8 +52,16 @@ export function MessageBubble({
       ? 'rounded-tr-2xl rounded-tl-[4px] rounded-b-2xl'
       : 'rounded-2xl'
 
+  function startEditing() {
+    setDraft(message.text)
+    setEditEmbedDisabled(message.embedDisabled)
+    setEditing(true)
+  }
+
   function submitEdit() {
-    if (draft.trim() && draft.trim() !== message.text) onEdit(draft.trim())
+    if (draft.trim() && (draft.trim() !== message.text || editEmbedDisabled !== message.embedDisabled)) {
+      onEdit(draft.trim(), editEmbedDisabled)
+    }
     setEditing(false)
   }
 
@@ -131,7 +143,7 @@ export function MessageBubble({
             </button>
             {isOwn && (
               <>
-                <button type="button" onClick={() => setEditing(true)} className="px-1 text-[11px] text-ink-2 hover:text-ink-1">
+                <button type="button" onClick={startEditing} className="px-1 text-[11px] text-ink-2 hover:text-ink-1">
                   Edit
                 </button>
                 <button type="button" onClick={onDelete} className="px-1 text-[11px] text-danger hover:opacity-80">
@@ -160,6 +172,14 @@ export function MessageBubble({
           </div>
         )}
       </div>
+
+      {embed && (editing ? !editEmbedDisabled : !message.embedDisabled) && (
+        <YouTubeEmbed
+          embed={embed}
+          onRemove={editing ? () => setEditEmbedDisabled(true) : undefined}
+          className={!isOwn && !showMeta && !editing ? 'ml-[34px]' : ''}
+        />
+      )}
 
       {reactionEntries.length > 0 && (
         <div className={`flex flex-wrap gap-1 ${isOwn ? 'justify-end' : ''} ${!isOwn && !showMeta ? 'ml-[34px]' : ''}`}>

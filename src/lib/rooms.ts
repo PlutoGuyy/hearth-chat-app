@@ -63,6 +63,7 @@ export async function sendMessage(
   senderId: string,
   text: string,
   attachments: Attachment[] = [],
+  embedDisabled = false,
 ) {
   const trimmed = text.trim()
   if (!trimmed && attachments.length === 0) return
@@ -75,6 +76,7 @@ export async function sendMessage(
     deletedAt: null,
     attachments,
     reactions: {},
+    embedDisabled,
   })
 
   await updateDoc(doc(db, 'rooms', roomId), {
@@ -89,11 +91,13 @@ export async function sendMessage(
   await setTyping(roomId, senderId, false)
 }
 
-export async function editMessage(roomId: string, messageId: string, text: string) {
-  await updateDoc(doc(db, 'rooms', roomId, 'messages', messageId), {
+export async function editMessage(roomId: string, messageId: string, text: string, embedDisabled?: boolean) {
+  const update: Record<string, unknown> = {
     text: text.trim(),
     editedAt: serverTimestamp(),
-  })
+  }
+  if (embedDisabled !== undefined) update.embedDisabled = embedDisabled
+  await updateDoc(doc(db, 'rooms', roomId, 'messages', messageId), update)
 }
 
 export async function deleteMessage(roomId: string, messageId: string) {
